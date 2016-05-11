@@ -1,15 +1,16 @@
+import collections
 import copy as cp
 import warnings
 from numbers import Number
-import collections
+
 import numpy as np
 import pyqtgraph as pg
 from scipy.optimize import root
 
-from .registry import get_base, register_base
 from . import placeholder as ph
-from .placeholder import FieldVariable, TestFunction
 from . import visualization as vis
+from .placeholder import FieldVariable, TestFunction
+from .registry import get_base, register_base
 
 
 class Parameters:
@@ -144,11 +145,13 @@ def find_roots(function, n_roots, grid, rtol=0, atol=1e-7, show_plot=False, comp
             # pw.plot(np.imag(good_roots), np.imag(results), pen=None, symbolPen=pg.mkPen("g"))
         else:
             if dim == 1:
-                results = function(grids)
+                func = np.vectorize(function)
+                # results = np.array([function(val) for val in grids[0]])
+                results = func(grids[0])
                 colors = vis.create_colormap(len(grids))
                 for idx, (intake, output) in enumerate(zip(grids, results)):
-                    pw.plot(intake.flatten(), output.flatten(), pen=pg.mkPen(colors[idx]))
-                    pw.plot(np.hstack([good_roots, function(good_roots)]), pen=None, symbolPen=pg.mkPen("g"))
+                    # pw.plot(intake.flatten(), output.flatten(), pen=pg.mkPen(colors[idx]))
+                    pw.plot(np.hstack([good_roots, func(good_roots)]), pen=None, symbolPen=pg.mkPen("g"))
 
         pg.QtGui.QApplication.instance().exec_()
 

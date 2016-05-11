@@ -1,8 +1,8 @@
 import numpy as np
 import pyqtgraph as pg
 
-from .registry import register_base
-from .core import Function
+from .core import Function, project_on_base
+from .registry import get_base
 from .simulation import Domain, evaluate_approximation
 from .visualization import create_colormap
 
@@ -12,38 +12,37 @@ for curing can be found here.
 """
 
 
-def visualize_shapefunctions(cls, domain, cnt, der_order, show_plots=True):
+def visualize_shapefunctions(label, der_order, return_approx_error=False, show=True):
     """
     verify the correct connection with visual feedback
-    :param cls: Class to use for interval curing
     :param der_order: derivative order of shape function to use
     """
     dt = Domain((0, 0), num=1)
 
-    nodes, funcs = cure_interval(cls, domain.bounds, node_count=cnt)
-    register_base("test", funcs, overwrite=True)
+    funcs = get_base(label, der_order)
+    domain = Domain(bounds=funcs[0].domain[0], num=1000)
 
     # approx_func = pi.Function(np.cos, domain=dz.bounds,
     #                           derivative_handles=[lambda z: -np.sin(z), lambda z: -np.cos(z)])
     approx_func = Function(lambda z: np.sin(3*z), domain=domain.bounds,
                            derivative_handles=[lambda z: 3*np.cos(3*z), lambda z: -9*np.sin(3*z)])
 
-    weights = approx_func(nodes)
+    weights = project_on_base(approx_func, funcs)
 
-    hull = evaluate_approximation("test", np.atleast_2d(weights),
+    hull = evaluate_approximation(label, np.atleast_2d(weights),
                                   temp_domain=dt, spat_domain=domain, spat_order=der_order)
 
-    if show_plots:
+    if show:
         # plot shapefunctions
         c_map = create_colormap(len(funcs))
-        pw = pg.plot(title="{}-Test".format(cls.__name__))
+        pw = pg.plot(title="{}-Test".format(funcs[0].__class__.__name__))
         pw.addLegend()
         pw.showGrid(x=True, y=True, alpha=0.5)
 
         [pw.addItem(pg.PlotDataItem(np.array(domain),
-                                    weights[idx]*func.derive(der_order)(domain),
+                                    weights[idx] * func.derive(der_order)(domain),
                                     pen=pg.mkPen(color=c_map[idx]),
-                                    name="{}.{}".format(cls.__name__, idx)))
+                                    name="{}.{}".format(funcs[0].__class__.__name__, idx)))
          for idx, func in enumerate(funcs)]
 
         # plot hull curve
@@ -54,7 +53,8 @@ def visualize_shapefunctions(cls, domain, cnt, der_order, show_plots=True):
                                    pen=pg.mkPen(color="m", width=2, style=pg.QtCore.Qt.DashLine), name="original"))
         pg.QtCore.QCoreApplication.instance().exec_()
 
-    return np.sum(np.abs(hull.output_data[0, :] - approx_func.derive(der_order)(domain)))
+    if return_approx_error:
+        return np.sum(np.abs(hull.output_data[0, :] - approx_func.derive(der_order)(domain)))
 
 
 class LagrangeFirstOrder(Function):
@@ -88,7 +88,7 @@ class LagrangeFirstOrder(Function):
         else:
             funcs = self._function_factory(start, top, end, **kwargs)
 
-        Function.__init__(self, funcs[0], nonzero=(start, end), derivative_handles=funcs[1:])
+        Function.__init__(self, funcs[0], domain=kwargs["domain"], nonzero=(start, end), derivative_handles=funcs[1:])
 
     @staticmethod
     def _function_factory(start, mid, end, **kwargs):
@@ -129,16 +129,17 @@ class LagrangeFirstOrder(Function):
         """
         funcs = np.empty((len(domain),), dtype=LagrangeFirstOrder)
         funcs[0] = LagrangeFirstOrder(domain[0], domain[1], domain[1], half="left", left_border=True,
-                                      right_border=True if len(domain) == 2 else False)
+                                      right_border=True if len(domain) == 2 else False, domain=domain.bounds)
         funcs[-1] = LagrangeFirstOrder(domain[-2], domain[-2], domain[-1], half="right", right_border=True,
-                                       left_border=True if len(domain) == 2 else False)
+                                       left_border=True if len(domain) == 2 else False, domain=domain.bounds)
 
         for idx in range(1, len(domain)-1):
             funcs[idx] = LagrangeFirstOrder(domain[idx-1],
                                             domain[idx],
                                             domain[idx+1],
                                             left_border=True if idx == 1 else False,
-                                            right_border=True if idx == len(domain)-2 else False)
+                                            right_border=True if idx == len(domain) - 2 else False,
+                                            domain=domain.bounds)
         return domain, funcs
 
 

@@ -1,20 +1,13 @@
+import collections
+from functools import partial
+from numbers import Number
+
 import numpy as np
 import scipy.integrate as si
-from scipy.interpolate import interp1d
 from scipy.optimize import fsolve
+
 from . import utils as ut
-from . import placeholder as ph
-from .core import Function, back_project_from_base
-from .shapefunctions import LagrangeFirstOrder, LagrangeSecondOrder
-from .placeholder import FieldVariable, TestFunction
-from .visualization import EvalData
-import pyqtgraph as pg
-from numbers import Number
-from functools import partial
-import warnings
-import copy as cp
-import pyqtgraph as pg
-import collections
+from .core import Function
 
 
 class AddMulFunction(object):
@@ -49,7 +42,7 @@ class FiniteTransformFunction(Function):
         self.M = M
         self.b = b
         self.l = l
-        if scale_func == None:
+        if scale_func is None:
             self.scale_func = lambda z: 1
         else:
             self.scale_func = scale_func
@@ -182,17 +175,34 @@ class TransformedSecondOrderEigenfunction(Function):
 
 class SecondOrderRobinEigenfunction(Function):
     def __init__(self, om, param, spatial_domain, phi_0=1):
+        """
+        Eigenfunction for second-order spatial operator with robin boundary conditions
+        :param om: omega, eigenfrequency
+        :param param: parameters of the operator
+        :param spatial_domain: domain of the operator
+        :param phi_0: function value at z=0, can later be used for normalization
+        """
         self._om = om
         self._param = param
         self.phi_0 = phi_0
-        Function.__init__(self, self._phi, nonzero=spatial_domain, derivative_handles=[self._d_phi, self._dd_phi])
+        Function.__init__(self, self._phi, domain=spatial_domain, nonzero=spatial_domain,
+                          derivative_handles=[self._d_phi, self._dd_phi])
 
     @staticmethod
-    def cure_hint(domain):
-        order = len(domain)
-        w = compute_rad_robin_eigenfrequencies(**kwargs)
-        funcs = np.array([SecondOrderRobinEigenfunction(freq, **kwargs) for freq in w])
-        return domain, funcs
+    def cure_interval(parameters, domain, order):
+        """
+        cures the given interval with functions up to order ``order`` the returned functions are not normalized.
+
+        :param parameters: parameters of the operator
+        :param domain: domain of the operator
+        :param order: order of approximation
+        :return: array containing :py:class:`SecondOrderRobinEigenfunction`
+        """
+        w, eig_v = compute_rad_robin_eigenfrequencies(parameters, domain.bounds[-1], n_roots=order, show_plot=False)
+        print("calculated eigenfrequencies: {}".format(w))
+        print("calculated eigenvalues: {}".format(eig_v))
+        funcs = np.array([SecondOrderRobinEigenfunction(freq, parameters, domain.bounds, phi_0=1) for freq in w])
+        return funcs
 
     def _phi(self, z):
         a2, a1, a0, alpha, beta = self._param
@@ -281,11 +291,18 @@ def compute_eigenfrequencies(parameter, domain, num, show):
     eta = -a1 / (2 * a2)
 
     def char_eq(w):
-        if w == 0:
-            return 1
-        return (alpha + beta) * np.cos(w * l) + ((eta + beta) * (alpha - eta) / w - w) * np.sin(w * l)
+        # if w == 0:
+        #     return 1
+        # return (alpha + beta) * np.cos(w * l) + ((eta + beta) * (alpha - eta) / w - w) * np.sin(w * l)
 
-    return ut.find_roots(Function(char_eq), num, np.linspace(0.1, num*2*np.pi, 100), show_plot=show)
+        om = w
+        if np.round(om, 200) != 0.:
+            zero = (alpha + beta) * np.cos(om * l) + ((eta + beta) * (alpha - eta) / om - om) * np.sin(om * l)
+        else:
+            zero = (alpha + beta) * np.cos(om * l) + (eta + beta) * (alpha - eta) * l - om * np.sin(om * l)
+        return zero
+
+    return ut.find_roots(Function(char_eq), num, np.arange(0, 2 * num * np.pi, np.pi / 4), show_plot=show)
 
 
 def compute_rad_robin_eigenfrequencies(param, l, n_roots=10, show_plot=False):
@@ -309,7 +326,7 @@ def compute_rad_robin_eigenfrequencies(param, l, n_roots=10, show_plot=False):
     # assume 1 root per pi/l (safety factor = 3)
     om_end = 3 * n_roots * np.pi / l
     start_values = np.arange(0, om_end, .1)
-    om = ut.find_roots(characteristic_equation, (0, 2 * n_roots), start_values, rtol=int(np.log10(l) - 6),
+    om = ut.find_roots(characteristic_equation, n_roots, start_values, rtol=int(np.log10(l) - 6),
                        show_plot=show_plot).tolist()
 
     # delete all around om = 0

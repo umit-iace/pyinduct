@@ -1,11 +1,11 @@
 import sys
 import unittest
-import matplotlib as mpl
+
 import numpy as np
-from matplotlib import pyplot as plt
 
 import pyinduct as pi
 import pyinduct.shapefunctions
+from pyinduct.shapefunctions import cure_interval, visualize_shapefunctions
 
 if any([arg == 'discover' for arg in sys.argv]):
     show_plots = False
@@ -16,6 +16,14 @@ else:
 if show_plots:
     import pyqtgraph as pg
     app = pg.QtGui.QApplication([])
+
+
+class VisualisationTestCase(unittest.TestCase):
+    def test_lag1st(self):
+        dz = pi.Domain(bounds=(0, 1), num=10)
+        nodes, funcs = cure_interval(pi.LagrangeFirstOrder, dz.bounds, node_count=5)
+        pi.register_base("lag1st", funcs)
+        visualize_shapefunctions("lag1st", 0)
 
 
 class CureTestCase(unittest.TestCase):
