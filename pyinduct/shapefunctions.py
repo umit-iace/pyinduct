@@ -1,12 +1,60 @@
 import numpy as np
+import pyqtgraph as pg
 
+from .registry import register_base
 from .core import Function
-from .simulation import Domain
+from .simulation import Domain, evaluate_approximation
+from .visualization import create_colormap
 
 """
 This module contains all shape functions that come with PyInduct. Furthermore helper methods
 for curing can be found here.
 """
+
+
+def visualize_shapefunctions(cls, domain, cnt, der_order, show_plots=True):
+    """
+    verify the correct connection with visual feedback
+    :param cls: Class to use for interval curing
+    :param der_order: derivative order of shape function to use
+    """
+    dt = Domain((0, 0), num=1)
+
+    nodes, funcs = cure_interval(cls, domain.bounds, node_count=cnt)
+    register_base("test", funcs, overwrite=True)
+
+    # approx_func = pi.Function(np.cos, domain=dz.bounds,
+    #                           derivative_handles=[lambda z: -np.sin(z), lambda z: -np.cos(z)])
+    approx_func = Function(lambda z: np.sin(3*z), domain=domain.bounds,
+                           derivative_handles=[lambda z: 3*np.cos(3*z), lambda z: -9*np.sin(3*z)])
+
+    weights = approx_func(nodes)
+
+    hull = evaluate_approximation("test", np.atleast_2d(weights),
+                                  temp_domain=dt, spat_domain=domain, spat_order=der_order)
+
+    if show_plots:
+        # plot shapefunctions
+        c_map = create_colormap(len(funcs))
+        pw = pg.plot(title="{}-Test".format(cls.__name__))
+        pw.addLegend()
+        pw.showGrid(x=True, y=True, alpha=0.5)
+
+        [pw.addItem(pg.PlotDataItem(np.array(domain),
+                                    weights[idx]*func.derive(der_order)(domain),
+                                    pen=pg.mkPen(color=c_map[idx]),
+                                    name="{}.{}".format(cls.__name__, idx)))
+         for idx, func in enumerate(funcs)]
+
+        # plot hull curve
+        pw.addItem(pg.PlotDataItem(np.array(hull.input_data[1]), hull.output_data[0, :],
+                                   pen=pg.mkPen(width=2), name="hull-curve"))
+        # plot original function
+        pw.addItem(pg.PlotDataItem(np.array(domain), approx_func.derive(der_order)(domain),
+                                   pen=pg.mkPen(color="m", width=2, style=pg.QtCore.Qt.DashLine), name="original"))
+        pg.QtCore.QCoreApplication.instance().exec_()
+
+    return np.sum(np.abs(hull.output_data[0, :] - approx_func.derive(der_order)(domain)))
 
 
 class LagrangeFirstOrder(Function):

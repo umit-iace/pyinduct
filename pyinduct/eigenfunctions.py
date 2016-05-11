@@ -187,6 +187,13 @@ class SecondOrderRobinEigenfunction(Function):
         self.phi_0 = phi_0
         Function.__init__(self, self._phi, nonzero=spatial_domain, derivative_handles=[self._d_phi, self._dd_phi])
 
+    @staticmethod
+    def cure_hint(domain):
+        order = len(domain)
+        w = compute_rad_robin_eigenfrequencies(**kwargs)
+        funcs = np.array([SecondOrderRobinEigenfunction(freq, **kwargs) for freq in w])
+        return domain, funcs
+
     def _phi(self, z):
         a2, a1, a0, alpha, beta = self._param
         om = self._om
@@ -268,6 +275,19 @@ class SecondOrderDirichletEigenfunction(Function):
         return return_real_part(d_phi_i * self.norm_fac)
 
 
+def compute_eigenfrequencies(parameter, domain, num, show):
+    a2, a1, a0, alpha, beta = parameter
+    l = domain.bounds[-1]
+    eta = -a1 / (2 * a2)
+
+    def char_eq(w):
+        if w == 0:
+            return 1
+        return (alpha + beta) * np.cos(w * l) + ((eta + beta) * (alpha - eta) / w - w) * np.sin(w * l)
+
+    return ut.find_roots(Function(char_eq), num, np.linspace(0.1, num*2*np.pi, 100), show_plot=show)
+
+
 def compute_rad_robin_eigenfrequencies(param, l, n_roots=10, show_plot=False):
     a2, a1, a0, alpha, beta = param
     eta = -a1 / 2. / a2
@@ -289,7 +309,7 @@ def compute_rad_robin_eigenfrequencies(param, l, n_roots=10, show_plot=False):
     # assume 1 root per pi/l (safety factor = 3)
     om_end = 3 * n_roots * np.pi / l
     start_values = np.arange(0, om_end, .1)
-    om = ut.find_roots(characteristic_equation, 2 * n_roots, start_values, rtol=int(np.log10(l) - 6),
+    om = ut.find_roots(characteristic_equation, (0, 2 * n_roots), start_values, rtol=int(np.log10(l) - 6),
                        show_plot=show_plot).tolist()
 
     # delete all around om = 0

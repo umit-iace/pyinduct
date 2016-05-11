@@ -176,11 +176,13 @@ class Function(BaseFraction):
         testval = self.domain[0][1]
         if testval is np.inf:
             testval = 1
-        if not isinstance(eval_handle(testval), Number):
-            raise TypeError("callable must return number when called with scalar")
         if vectorial:
             if not isinstance(eval_handle(np.array([testval] * 10)), np.ndarray):
                 raise TypeError("callable must return np.ndarray when called with vector")
+        else:
+            if not isinstance(eval_handle(testval), Number):
+                raise TypeError("callable must return number when called with scalar")
+
         self._function_handle = eval_handle
         self.vectorial = vectorial
 
