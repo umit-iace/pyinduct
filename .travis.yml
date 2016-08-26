@@ -1,9 +1,11 @@
 # Config file for automatic testing at travis-ci.org
 
 branches:
-  # Exclude some branches (which names start with branch2go) from travis
+  # Exclude some branches (which names start with branch2go or underscore) from travis
   except:
     - /^(?i:branch2go)-.*$/
+    - /^(_)-.*$/
+#    - /^(_{1}\w)/
 
 language: python
 
