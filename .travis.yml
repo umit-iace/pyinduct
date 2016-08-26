@@ -5,7 +5,7 @@ branches:
   except:
     - /^(?i:branch2go)-.*$/
     - /^(_)-.*$/
-#    - /^(_{1}\w)/
+    - /^(_{1}\w)/
 
 language: python
 
