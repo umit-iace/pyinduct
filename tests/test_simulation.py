@@ -4,7 +4,6 @@ import unittest
 from pickle import dump
 
 import numpy as np
-
 from pyinduct import register_base, deregister_base, \
     eigenfunctions as ef, \
     core as cr, \

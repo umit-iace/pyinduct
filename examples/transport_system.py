@@ -1,3 +1,4 @@
+import numpy as np
 import pyinduct.core as cr
 import pyinduct.placeholder as ph
 import pyinduct.registry as reg
@@ -5,7 +6,6 @@ import pyinduct.shapefunctions as sh
 import pyinduct.simulation as sim
 import pyinduct.trajectory as tr
 import pyinduct.visualization as vis
-import numpy as np
 import pyqtgraph as pg
 
 sys_name = 'transport system'

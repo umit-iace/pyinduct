@@ -1,12 +1,11 @@
 import numpy as np
-import pyqtgraph as pg
-
-import pyinduct.trajectory as tr
 import pyinduct.core as cr
+import pyinduct.placeholder as ph
 import pyinduct.shapefunctions as sh
 import pyinduct.simulation as sim
+import pyinduct.trajectory as tr
 import pyinduct.visualization as vis
-import pyinduct.placeholder as ph
+import pyqtgraph as pg
 from pyinduct import register_base, get_base
 
 n_fem = 17

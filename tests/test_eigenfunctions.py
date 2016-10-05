@@ -3,7 +3,6 @@ import unittest
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from pyinduct import core as cr, \
     utils as ut, \
     eigenfunctions as ef

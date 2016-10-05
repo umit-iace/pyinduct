@@ -1,10 +1,10 @@
-import pyinduct.visualization as vis
 import os
 import sys
 import unittest
 from pickle import loads
 
 import matplotlib.pyplot as plt
+import pyinduct.visualization as vis
 import pyqtgraph as pg
 
 # TODO: __init__ global variable show_plots

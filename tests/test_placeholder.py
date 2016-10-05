@@ -2,7 +2,6 @@ import sys
 import unittest
 
 import numpy as np
-
 from pyinduct import core as cr, simulation as sim, utils as ut, placeholder as ph
 from pyinduct import register_base, deregister_base, LagrangeFirstOrder, cure_interval
 

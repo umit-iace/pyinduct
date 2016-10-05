@@ -1,13 +1,13 @@
-import pyinduct.trajectory as tr
+import numpy as np
+import pyinduct.control as ct
 import pyinduct.core as cr
+import pyinduct.placeholder as ph
 import pyinduct.shapefunctions as sh
 import pyinduct.simulation as sim
-import pyinduct.visualization as vis
-import pyinduct.placeholder as ph
+import pyinduct.trajectory as tr
 import pyinduct.utils as ut
-import pyinduct.control as ct
+import pyinduct.visualization as vis
 from pyinduct import register_base
-import numpy as np
 from pyqtgraph.Qt import QtGui
 
 

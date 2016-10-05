@@ -1,11 +1,11 @@
 import sys
-import warnings
 import unittest
-import numpy as np
-import scipy.signal as sig
+import warnings
 
-import pyinduct.utils as ut
+import numpy as np
 import pyinduct.simulation as sim
+import pyinduct.utils as ut
+import scipy.signal as sig
 from pyinduct import trajectory as tr, visualization as vis
 
 if any([arg in {'discover', 'setup.py', 'test'} for arg in sys.argv]):

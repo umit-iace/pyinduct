@@ -1,8 +1,8 @@
+import os
 import sys
 import unittest
-import numpy as np
-import os
 
+import numpy as np
 from pyinduct import register_base, deregister_base, \
     core as cr, \
     simulation as sim, \

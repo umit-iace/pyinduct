@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import unittest
+
+import numpy as np
 from pyinduct import register_base, is_registered, deregister_base, get_base, cure_interval, LagrangeFirstOrder
 
 """

@@ -5,8 +5,8 @@ Test benches for the computational efficiency of toolbox routines.
 import sys
 import time
 import unittest
-import numpy as np
 
+import numpy as np
 import pyinduct.core as cr
 import pyinduct.placeholder as ph
 import pyinduct.registry as reg

@@ -2,8 +2,6 @@ import sys
 import unittest
 
 import numpy as np
-from scipy import integrate
-
 from pyinduct import control as ct
 from pyinduct import core as cr
 from pyinduct import eigenfunctions as ef
@@ -14,6 +12,7 @@ from pyinduct import simulation as sim
 from pyinduct import trajectory as tr
 from pyinduct import utils as ut
 from pyinduct import visualization as vis
+from scipy import integrate
 
 if any([arg in {'discover', 'setup.py', 'test'} for arg in sys.argv]):
     show_plots = False
