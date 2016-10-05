@@ -24,7 +24,6 @@ if show_plots:
 
 
 class ParamsTestCase(unittest.TestCase):
-
     def test_init(self):
         p = ut.Parameters(a=10, b=12, c="high")
         self.assertTrue(p.a == 10)
