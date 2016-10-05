@@ -2,14 +2,15 @@
 In the Core module you can find all basic classes and functions which form the backbone of the toolbox.
 """
 
-from abc import ABCMeta, abstractmethod
+import collections
 from copy import copy, deepcopy
 from numbers import Number
+
 import numpy as np
 from scipy import integrate
 from scipy.linalg import block_diag
+
 from .registry import get_base
-import collections
 
 
 def sanitize_input(input_object, allowed_type):

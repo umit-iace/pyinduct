@@ -5,15 +5,17 @@ well as input signal generator for equilibrium to equilibrium transitions for
 hyperbolic and parabolic systems.
 """
 
-import sympy as sp
 import warnings
-from .simulation import SimulationInput
 from numbers import Number
-from . import eigenfunctions as ef
-import scipy.misc as sm
-import scipy.signal as sig
+
 import numpy as np
 import pyqtgraph as pg
+import scipy.misc as sm
+import scipy.signal as sig
+import sympy as sp
+
+from .eigenfunctions import transform_to_intermediate
+from .simulation import SimulationInput
 
 # TODO move this to a more feasible location
 sigma_tanh = 1.1
@@ -578,7 +580,7 @@ class RadTrajectory(InterpTrajectory):
         self._l = l
         self._T = T
         self._a1_original = param_original[1]
-        self._param = ef.transform_to_intermediate(param_original)
+        self._param = transform_to_intermediate(param_original)
         self._bound_cond_type = bound_cond_type
         self._actuation_type = actuation_type
         self._n = n

@@ -2,15 +2,15 @@
 In :py:mod:`pyinduct.placeholder` you find placeholders for symbolic Term definitions.
 """
 
-from abc import ABCMeta
+import collections
 import copy
+from abc import ABCMeta
 from numbers import Number
 
 import numpy as np
 
-from .registry import get_base, register_base, is_registered
 from .core import sanitize_input
-import collections
+from .registry import get_base, register_base, is_registered
 
 
 class Placeholder(object):

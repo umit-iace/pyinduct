@@ -3,18 +3,18 @@ Simulation infrastructure with helpers and data structures for preprocessing of 
 and functions for postprocessing of simulation data.
 """
 
-from abc import ABCMeta, abstractmethod
-from collections import Iterable
 import warnings
-import numpy as np
+from abc import ABCMeta, abstractmethod
 from itertools import chain
-from scipy.linalg import block_diag
-from scipy.interpolate import interp1d
-from scipy.integrate import ode
 
-from .registry import get_base, is_registered
+import numpy as np
+from scipy.integrate import ode
+from scipy.interpolate import interp1d
+from scipy.linalg import block_diag
+
 from .core import (Function, integrate_function, calculate_scalar_product_matrix, project_on_base, dot_product_l2)
 from .placeholder import Scalars, TestFunction, Input, FieldVariable, EquationTerm, get_common_target
+from .registry import get_base
 from .visualization import EvalData
 
 

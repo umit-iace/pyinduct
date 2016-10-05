@@ -4,11 +4,12 @@ as well as their implementation for simulation purposes.
 """
 
 from itertools import chain
+
 import numpy as np
 
-from .registry import get_base
 from .core import domain_intersection, integrate_function, TransformationInfo, get_weight_transformation
-from .placeholder import EquationTerm, ScalarTerm, IntegralTerm, Scalars, FieldVariable, get_common_target
+from .placeholder import EquationTerm, Scalars, FieldVariable, get_common_target
+from .registry import get_base
 from .simulation import SimulationInput, CanonicalForms
 
 

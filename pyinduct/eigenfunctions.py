@@ -5,17 +5,19 @@ The functions which compute the eigenvalues are deliberately separated from the 
 order to handle transformations and reduce effort within the controller implementation.
 """
 
+import collections as cl
+from abc import ABCMeta, abstractstaticmethod
+from functools import partial
+from numbers import Number
+
+import matplotlib.pyplot as plt
 import numpy as np
+import scipy.integrate as si
 import sympy as sp
 from sympy.utilities.lambdify import lambdify
-import scipy.integrate as si
-from . import utils as ut
-from .core import Function, back_project_from_base
-from numbers import Number
-from functools import partial
-import collections
-import matplotlib.pyplot as plt
-from abc import ABCMeta, abstractstaticmethod
+
+from .core import Function
+from .utils import find_roots, function_wrapper
 
 
 class LambdifiedSympyExpression(Function):
@@ -406,14 +408,14 @@ class SecondOrderRobinEigenfunction(Function, SecondOrderEigenfunction):
 
         # search imaginary roots
         try:
-            om = list(ut.find_roots(characteristic_equation, 100, [np.array([0]), start_values_imag],
-                                    rtol=int(np.log10(l) - 3), complex=True, show_plot=show_plot, get_all=True))
+            om = list(find_roots(characteristic_equation, 100, [np.array([0]), start_values_imag],
+                                 rtol=int(np.log10(l) - 3), complex=True, show_plot=show_plot, get_all=True))
         except ValueError:
             om = list()
 
         # search real roots
-        om += ut.find_roots(characteristic_equation, 2 * n_roots, [start_values_real, np.array([0])],
-                            rtol=int(np.log10(l) - 3), complex=True, show_plot=show_plot).tolist()
+        om += find_roots(characteristic_equation, 2 * n_roots, [start_values_real, np.array([0])],
+                         rtol=int(np.log10(l) - 3), complex=True, show_plot=show_plot).tolist()
 
         # only "real" roots and complex roots with imaginary part != 0 and real part == 0 considered
         if any([not np.isclose(root.real, 0) and not np.isclose(root.imag, 0) for root in om]):
@@ -475,7 +477,7 @@ class TransformedSecondOrderEigenfunction(Function):
             and isinstance(init_state_vect, (list, tuple)):
             raise TypeError
         if not len(dgl_coefficients) == 3 and isinstance(dgl_coefficients, (list, tuple)) and all(
-            [isinstance(coef, collections.Callable) or isinstance(coef, (int, float)) for coef in dgl_coefficients]):
+            [isinstance(coef, cl.Callable) or isinstance(coef, (int, float)) for coef in dgl_coefficients]):
             raise TypeError
         if not isinstance(domain, (np.ndarray, list)) or not all([isinstance(num, (int, float)) for num in domain]):
             raise TypeError
@@ -490,7 +492,7 @@ class TransformedSecondOrderEigenfunction(Function):
             raise TypeError
 
         self._init_state_vect = init_state_vect
-        self._a2, self._a1, self._a0 = [ut.function_wrapper(coef) for coef in dgl_coefficients]
+        self._a2, self._a1, self._a0 = [function_wrapper(coef) for coef in dgl_coefficients]
         self._domain = domain
 
         state_vect = self._transform_eigenfunction()
@@ -589,7 +591,7 @@ class FiniteTransformFunction(Function):
 
     def __init__(self, function, M, l, scale_func=None, nested_lambda=False):
 
-        if not isinstance(function, collections.Callable):
+        if not isinstance(function, cl.Callable):
             raise TypeError
         if not isinstance(M, np.ndarray) or len(M.shape) != 2 or np.diff(M.shape) != 0 or M.shape[0] % 1 != 0:
             raise TypeError
@@ -728,24 +730,24 @@ def transform_to_intermediate(param, l=None):
         raise TypeError("pyinduct.utils.transform_2_intermediate(): argument param must from type tuple or list")
 
     a2, a1, a0, alpha, beta = param
-    if isinstance(a1, collections.Callable) or isinstance(a0, collections.Callable):
+    if isinstance(a1, cl.Callable) or isinstance(a0, cl.Callable):
         if not len(a1._derivative_handles) >= 1:
             raise TypeError
-        a0_z = ut.function_wrapper(a0)
+        a0_z = function_wrapper(a0)
         a0_n = lambda z: a0_z(z) - a1(z) ** 2 / 4 / a2 - a1.derive(1)(z) / 2
     else:
         a0_n = a0 - a1 ** 2 / 4 / a2
 
     if alpha is None:
         alpha_n = None
-    elif isinstance(a1, collections.Callable):
+    elif isinstance(a1, cl.Callable):
         alpha_n = a1(0) / 2. / a2 + alpha
     else:
         alpha_n = a1 / 2. / a2 + alpha
 
     if beta is None:
         beta_n = None
-    elif isinstance(a1, collections.Callable):
+    elif isinstance(a1, cl.Callable):
         beta_n = -a1(l) / 2. / a2 + beta
     else:
         beta_n = -a1 / 2. / a2 + beta

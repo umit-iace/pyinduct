@@ -7,17 +7,16 @@ The function :py:func:`pyinduct.simulation.simulate_system` for example already 
 as EvalData object.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from numbers import Number
-import time
 import os
-import scipy.interpolate as si
-# axes3d not explicit used but needed
-from mpl_toolkits.mplot3d import axes3d
+import time
+from numbers import Number
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
 import pyqtgraph.opengl as gl
+import scipy.interpolate as si
 
 from . import utils as ut
 

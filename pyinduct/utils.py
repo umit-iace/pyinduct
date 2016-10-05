@@ -2,21 +2,22 @@
 A few helper functions for users and developer.
 """
 
-from subprocess import run, call
+import collections
 import copy as cp
 import os
 import warnings
 from numbers import Number
-import collections
+from subprocess import call
+
 import numpy as np
 import pyqtgraph as pg
 from scipy.optimize import root
 
-from . import core as cr
-from . import placeholder as ph
+from .core import Function
+from .placeholder import (FieldVariable, TemporalDerivedFieldVariable, SpatialDerivedFieldVariable, TestFunction,
+                          ScalarFunction, Input, Product, ScalarTerm, IntegralTerm)
 from .registry import get_base, register_base
-from .placeholder import FieldVariable, TestFunction
-from . import visualization as vis
+from .visualization import create_colormap
 
 
 class Parameters:
@@ -165,7 +166,7 @@ def find_roots(function, n_roots, grid, rtol=0, atol=1e-7, show_plot=False, comp
         else:
             if dim == 1:
                 results = function(grids)
-                colors = vis.create_colormap(len(grids))
+                colors = create_colormap(len(grids))
                 for idx, (intake, output) in enumerate(zip(grids, results)):
                     pw.plot(intake.flatten(), output.flatten(), pen=pg.mkPen(colors[idx]))
                     pw.plot(np.hstack([good_roots, function(good_roots)]), pen=None, symbolPen=pg.mkPen("g"))
@@ -350,7 +351,7 @@ def scale_equation_term_list(eqt_list, factor):
     """
     if not isinstance(eqt_list, list):
         raise TypeError
-    if not all([isinstance(term, (ph.ScalarTerm, ph.IntegralTerm)) for term in eqt_list]):
+    if not all([isinstance(term, (ScalarTerm, IntegralTerm)) for term in eqt_list]):
         raise TypeError
     if not isinstance(factor, Number):
         raise TypeError
@@ -371,7 +372,7 @@ def get_parabolic_robin_backstepping_controller(state, approx_state, d_approx_st
     if not all([isinstance(arg, list) for arg in args]):
         raise TypeError
     terms = state + approx_state + d_approx_state + approx_target_state + d_approx_target_state
-    if not all([isinstance(term, (ph.ScalarTerm, ph.IntegralTerm)) for term in terms]):
+    if not all([isinstance(term, (ScalarTerm, IntegralTerm)) for term in terms]):
         raise TypeError
     if not all([isinstance(num, Number) for num in [original_beta, target_beta, integral_kernel_zz]]):
         raise TypeError
@@ -415,12 +416,12 @@ def function_wrapper(coef):
 
 def scalar_function_wrapper(coefficient, label):
     if not isinstance(coefficient, collections.Callable):
-        register_base(label, cr.Function(lambda z: coefficient), overwrite=True)
-    elif isinstance(coefficient, cr.Function):
+        register_base(label, Function(lambda z: coefficient), overwrite=True)
+    elif isinstance(coefficient, Function):
         register_base(label, coefficient, overwrite=True)
     else:
-        register_base(label, cr.Function(coefficient), overwrite=True)
-    return ph.ScalarFunction(label)
+        register_base(label, Function(coefficient), overwrite=True)
+    return ScalarFunction(label)
 
 
 def get_parabolic_dirichlet_weak_form(init_func_label, test_func_label, input, param, spatial_domain):
@@ -428,24 +429,24 @@ def get_parabolic_dirichlet_weak_form(init_func_label, test_func_label, input, p
     a2, a1, a0, alpha, beta = param
     l = spatial_domain[1]
     # integral terms
-    int1 = ph.IntegralTerm(ph.Product(ph.TemporalDerivedFieldVariable(init_func_label, order=1),
-                                      ph.TestFunction(test_func_label, order=0)), spatial_domain)
-    int2 = ph.IntegralTerm(
-        ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0), ph.TestFunction(test_func_label, order=2)),
+    int1 = IntegralTerm(Product(TemporalDerivedFieldVariable(init_func_label, order=1),
+                                TestFunction(test_func_label, order=0)), spatial_domain)
+    int2 = IntegralTerm(
+        Product(SpatialDerivedFieldVariable(init_func_label, order=0), TestFunction(test_func_label, order=2)),
         spatial_domain, -a2)
-    int3 = ph.IntegralTerm(
-        ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0), ph.TestFunction(test_func_label, order=1)),
+    int3 = IntegralTerm(
+        Product(SpatialDerivedFieldVariable(init_func_label, order=0), TestFunction(test_func_label, order=1)),
         spatial_domain, a1)
-    int4 = ph.IntegralTerm(
-        ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0), ph.TestFunction(test_func_label, order=0)),
+    int4 = IntegralTerm(
+        Product(SpatialDerivedFieldVariable(init_func_label, order=0), TestFunction(test_func_label, order=0)),
         spatial_domain, -a0)
     # scalar terms
-    s1 = ph.ScalarTerm(ph.Product(ph.Input(input), ph.TestFunction(test_func_label, order=1, location=l)), a2)
-    s2 = ph.ScalarTerm(ph.Product(ph.Input(input), ph.TestFunction(test_func_label, order=0, location=l)), -a1)
-    s3 = ph.ScalarTerm(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=1, location=l),
-                                  ph.TestFunction(test_func_label, order=0, location=l)), -a2)
-    s4 = ph.ScalarTerm(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=1, location=0),
-                                  ph.TestFunction(test_func_label, order=0, location=0)), a2)
+    s1 = ScalarTerm(Product(Input(input), TestFunction(test_func_label, order=1, location=l)), a2)
+    s2 = ScalarTerm(Product(Input(input), TestFunction(test_func_label, order=0, location=l)), -a1)
+    s3 = ScalarTerm(Product(SpatialDerivedFieldVariable(init_func_label, order=1, location=l),
+                            TestFunction(test_func_label, order=0, location=l)), -a2)
+    s4 = ScalarTerm(Product(SpatialDerivedFieldVariable(init_func_label, order=1, location=0),
+                            TestFunction(test_func_label, order=0, location=0)), a2)
 
     # derive state-space system
     return sim.WeakFormulation([int1, int2, int3, int4, s1, s2, s3, s4])
@@ -460,29 +461,29 @@ def get_parabolic_robin_weak_form(init_func_label, test_func_label, input, param
 
     a2, a1, a0, alpha, beta = param
     l = spatial_domain[1]
-    # init ph.ScalarFunction for a1 and a0, to handle spatially varying coefficients
+    # init ScalarFunction for a1 and a0, to handle spatially varying coefficients
     # a2 = _convert_to_scalar_function(a2, "a2_z")
     a1_z = scalar_function_wrapper(a1, "a1_z")
     a0_z = scalar_function_wrapper(a0, "a0_z")
 
     # integral terms
-    int1 = ph.IntegralTerm(ph.Product(ph.TemporalDerivedFieldVariable(init_func_label, order=1),
-                                      ph.TestFunction(test_func_label, order=0)), spatial_domain)
-    int2 = ph.IntegralTerm(
-        ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=1), ph.TestFunction(test_func_label, order=1)),
+    int1 = IntegralTerm(Product(TemporalDerivedFieldVariable(init_func_label, order=1),
+                                TestFunction(test_func_label, order=0)), spatial_domain)
+    int2 = IntegralTerm(
+        Product(SpatialDerivedFieldVariable(init_func_label, order=1), TestFunction(test_func_label, order=1)),
         spatial_domain, a2)
-    int3 = ph.IntegralTerm(ph.Product(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=1), a1_z),
-                                      ph.TestFunction(test_func_label, order=0)), spatial_domain, -1)
-    int4 = ph.IntegralTerm(ph.Product(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0), a0_z),
-                                      ph.TestFunction(test_func_label, order=0)), spatial_domain, -1)
+    int3 = IntegralTerm(Product(Product(SpatialDerivedFieldVariable(init_func_label, order=1), a1_z),
+                                TestFunction(test_func_label, order=0)), spatial_domain, -1)
+    int4 = IntegralTerm(Product(Product(SpatialDerivedFieldVariable(init_func_label, order=0), a0_z),
+                                TestFunction(test_func_label, order=0)), spatial_domain, -1)
 
     # scalar terms
-    s1 = ph.ScalarTerm(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0, location=0),
-                                  ph.TestFunction(test_func_label, order=0, location=0)), a2 * alpha)
-    s2 = ph.ScalarTerm(ph.Product(ph.SpatialDerivedFieldVariable(init_func_label, order=0, location=l),
-                                  ph.TestFunction(test_func_label, order=0, location=l)), a2 * beta)
-    s3 = ph.ScalarTerm(
-        ph.Product(ph.Input(input), ph.TestFunction(test_func_label, order=0, location=actuation_type_point)), -a2)
+    s1 = ScalarTerm(Product(SpatialDerivedFieldVariable(init_func_label, order=0, location=0),
+                            TestFunction(test_func_label, order=0, location=0)), a2 * alpha)
+    s2 = ScalarTerm(Product(SpatialDerivedFieldVariable(init_func_label, order=0, location=l),
+                            TestFunction(test_func_label, order=0, location=l)), a2 * beta)
+    s3 = ScalarTerm(
+        Product(Input(input), TestFunction(test_func_label, order=0, location=actuation_type_point)), -a2)
     # derive state-space system
     return sim.WeakFormulation([int1, int2, int3, int4, s1, s2, s3])
 
