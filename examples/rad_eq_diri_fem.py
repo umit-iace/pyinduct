@@ -1,3 +1,6 @@
+import numpy as np
+import pyqtgraph as pg
+
 import pyinduct.trajectory as tr
 import pyinduct.core as cr
 import pyinduct.shapefunctions as sh
@@ -6,16 +9,13 @@ import pyinduct.visualization as vis
 import pyinduct.placeholder as ph
 from pyinduct import register_base, get_base
 
-import numpy as np
-import pyqtgraph as pg
-
 n_fem = 17
 T = 1
 l = 1
 param = [1, 0, 0, None, None]  # or try this: param = [1, -0.5, -8, None, None]     :)))
 a2, a1, a0, _, _ = param
 
-temp_domain = sim.Domain(bounds=(0, T), num=1e2)
+temp_domain = sim.Domain(bounds=(0, T), num=100)
 spat_domain = sim.Domain(bounds=(0, l), num=n_fem * 11)
 
 # initial and test functions
@@ -34,7 +34,7 @@ u = tr.RadTrajectory(l, T, param, "dirichlet", "dirichlet")
 x = ph.FieldVariable("sim")
 phi = ph.TestFunction("sim")
 act_phi = ph.ScalarFunction("act_func")
-not_acuated_weak_form = sim.WeakFormulation([# ... of the homogeneous part of the system
+non_actuated_weak_form = sim.WeakFormulation([  # ... of the homogeneous part of the system
     ph.IntegralTerm(ph.Product(x.derive(temp_order=1), phi), limits=spat_domain.bounds),
     ph.IntegralTerm(ph.Product(x.derive(spat_order=1), phi.derive(1)), limits=spat_domain.bounds, scale=a2),
     ph.IntegralTerm(ph.Product(x.derive(spat_order=1), phi), limits=spat_domain.bounds, scale=-a1),
@@ -42,12 +42,12 @@ not_acuated_weak_form = sim.WeakFormulation([# ... of the homogeneous part of th
     # ... of the inhomogeneous part of the system
     ph.IntegralTerm(ph.Product(ph.Product(act_phi, phi), ph.Input(u, order=1)), limits=spat_domain.bounds),
     ph.IntegralTerm(ph.Product(ph.Product(act_phi.derive(1), phi.derive(1)), ph.Input(u)), limits=spat_domain.bounds,
-        scale=a2),
+                    scale=a2),
     ph.IntegralTerm(ph.Product(ph.Product(act_phi.derive(1), phi), ph.Input(u)), limits=spat_domain.bounds, scale=-a1),
     ph.IntegralTerm(ph.Product(ph.Product(act_phi, phi), ph.Input(u)), limits=spat_domain.bounds, scale=-a0)])
 
 # system matrices \dot x = A x + b0 u + b1 \dot u
-cf = sim.parse_weak_formulation(not_acuated_weak_form)
+cf = sim.parse_weak_formulation(non_actuated_weak_form)
 E1_inv = np.linalg.inv(cf._matrices["E"][1][1])
 ss = cf.convert_to_state_space()
 A = ss.A[1]
