@@ -84,12 +84,17 @@ class BaseFraction:
             return self._transformation_factory(info), None
         else:
             # No Idea what to do.
-            msg = "This is {1} speaking, \n" \
-                  "You requested information about how to transform to '{0}'({1}) from '{2}'({3}), \n" \
-                  "furthermore the source derivative order is {4} and the target one is {4}. \n" \
-                  "But this is a dumb method so implement your own hint to make things work!".format(info.dst_lbl,
-                self.__class__.__name__, info.src_lbl, info.src_base[0].__class__.__name__,
-                info.dst_base[0].__class__.__name__, info.src_order, info.dst_order)
+            msg = ("This is {1} speaking, \n"
+                   + "You requested information about how to transform to '{0}'({1}) from '{2}'({3}), \n"
+                   + "furthermore the source derivative order is {4} and the target one is {4}. \n"
+                   + "But this is a dumb method so implement your own hint to make things work!").format(
+                info.dst_lbl,
+                self.__class__.__name__,
+                info.src_lbl,
+                info.src_base[0].__class__.__name__,
+                info.dst_base[0].__class__.__name__,
+                info.src_order,
+                info.dst_order)
             raise NotImplementedError(msg)
 
     def scalar_product_hint(self):
