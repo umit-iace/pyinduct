@@ -17,7 +17,7 @@ from .core import Function
 from .placeholder import (FieldVariable, TemporalDerivedFieldVariable, SpatialDerivedFieldVariable, TestFunction,
                           ScalarFunction, Input, Product, ScalarTerm, IntegralTerm)
 from .registry import get_base, register_base
-from .visualization import create_colormap
+# from .visualization import create_colormap
 
 
 class Parameters:
@@ -166,9 +166,9 @@ def find_roots(function, n_roots, grid, rtol=0, atol=1e-7, show_plot=False, comp
         else:
             if dim == 1:
                 results = function(grids)
-                colors = create_colormap(len(grids))
+                # colors = create_colormap(len(grids))
                 for idx, (intake, output) in enumerate(zip(grids, results)):
-                    pw.plot(intake.flatten(), output.flatten(), pen=pg.mkPen(colors[idx]))
+                    pw.plot(intake.flatten(), output.flatten())  # , pen=pg.mkPen(colors[idx]))
                     pw.plot(np.hstack([good_roots, function(good_roots)]), pen=None, symbolPen=pg.mkPen("g"))
 
         pg.QtGui.QApplication.instance().exec_()
