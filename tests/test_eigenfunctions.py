@@ -28,6 +28,7 @@ class TestAddMulFunction(unittest.TestCase):
         x = np.dot(b, A)
         self.assertAlmostEqual([4, 40, 300], [x[0](4), x[1](20), x[2](100)])
 
+
 class TextSecondOrderEigenfunction(unittest.TestCase):
     def test_error_raiser(self):
         param = [1, 1, 1, 1, 1]
@@ -41,9 +42,9 @@ class TextSecondOrderEigenfunction(unittest.TestCase):
         _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, eig_freq=eig_freq, scale=np.ones(n))
 
         with self.assertRaises(ValueError):
-            _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, n, scale=np.ones(n+1))
+            _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, n, scale=np.ones(n + 1))
         with self.assertRaises(ValueError):
-            _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, eig_val=eig_val, scale=np.ones(n+1))
+            _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, eig_val=eig_val, scale=np.ones(n + 1))
         with self.assertRaises(ValueError):
             _, _ = ef.SecondOrderDirichletEigenfunction.solve_evp_hint(param, l, n, eig_freq=eig_freq)
         with self.assertRaises(ValueError):
