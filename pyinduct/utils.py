@@ -17,7 +17,6 @@ from .core import Function
 from .placeholder import (FieldVariable, TemporalDerivedFieldVariable, SpatialDerivedFieldVariable, TestFunction,
                           ScalarFunction, Input, Product, ScalarTerm, IntegralTerm)
 from .registry import get_base, register_base
-# from .visualization import create_colormap
 
 
 class Parameters:

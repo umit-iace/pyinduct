@@ -18,8 +18,6 @@ import pyqtgraph.exporters
 import pyqtgraph.opengl as gl
 import scipy.interpolate as si
 
-# from . import utils as ut
-
 colors = ["g", "c", "m", "b", "y", "k", "w", "r"]
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')

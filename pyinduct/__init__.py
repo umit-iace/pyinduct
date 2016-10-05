@@ -14,7 +14,7 @@ from .shapefunctions import cure_interval, LagrangeFirstOrder, LagrangeSecondOrd
 from .simulation import (Domain, EvalData, SimulationInput, SimulationInputSum, WeakFormulation, simulate_system,
                          process_sim_data, evaluate_approximation)
 # noinspection PyUnresolvedReferences
-from .trajectory import SmoothTransition, gevrey_tanh
+# from .trajectory import SmoothTransition, gevrey_tanh
 # noinspection PyUnresolvedReferences
 from .utils import find_roots
 # noinspection PyUnresolvedReferences
