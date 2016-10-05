@@ -36,6 +36,7 @@ class SimpleInput(sim.SimulationInput):
     """
     the simplest input we can imagine
     """
+
     def __init__(self):
         super().__init__("SimpleInput")
 
@@ -47,6 +48,7 @@ class MonotonousInput(sim.SimulationInput):
     """
     an input that ramps up
     """
+
     def __init__(self):
         super().__init__("MonotonousInput")
 
@@ -58,6 +60,7 @@ class CorrectInput(sim.SimulationInput):
     """
     a diligent input
     """
+
     def __init__(self):
         super().__init__("CorrectInput")
 
@@ -560,6 +563,7 @@ class StringMassTest(unittest.TestCase):
             """
             String With Mass Function Vector, necessary due to manipulated scalar product
             """
+
             def __init__(self, function, scalar):
                 super().__init__(function, scalar)
 
