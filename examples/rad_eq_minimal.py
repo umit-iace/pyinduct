@@ -35,7 +35,7 @@ bound_cond_type = 'dirichlet'
 l = 1
 T = 1
 spatial_domain = sim.Domain(bounds=(0, l), num=30)
-temporal_domain = sim.Domain(bounds=(0, T), num=1e2)
+temporal_domain = sim.Domain(bounds=(0, T), num=100)
 n = n_modal
 
 # eigenvalues /-functions original system
@@ -65,7 +65,7 @@ traj = tr.RadTrajectory(l, T, param_t, bound_cond_type, actuation_type)
 # input with feedback
 control_law = sim.SimulationInputSum([traj, controller])
 
-# determine (A,B) with modal-transfomation
+# determine (A,B) with modal transformation
 A = np.diag(eig_values)
 B = -a2 * np.array([eig_funcs[i].derive()(l) for i in range(n)])
 ss = sim.StateSpace("eig_funcs", A, B, input_handle=control_law)

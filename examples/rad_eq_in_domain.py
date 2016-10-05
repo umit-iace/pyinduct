@@ -27,7 +27,7 @@ bound_cond_type = 'robin'
 l = 1
 T = 1
 spatial_domain = sim.Domain(bounds=(0, l), num=n_fem)
-temporal_domain = sim.Domain(bounds=(0, T), num=1e2)
+temporal_domain = sim.Domain(bounds=(0, T), num=100)
 n = n_modal
 show_plots = False
 

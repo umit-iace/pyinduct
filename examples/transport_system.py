@@ -13,7 +13,7 @@ v = 10
 l = 5
 T = 5
 spat_domain = sim.Domain(bounds=(0, l), num=51)
-temp_domain = sim.Domain(bounds=(0, T), num=1e2)
+temp_domain = sim.Domain(bounds=(0, T), num=100)
 
 init_x = cr.Function(lambda z: 0)
 
@@ -48,5 +48,3 @@ win0.showGrid(x=False, y=True, alpha=0.5)
 vis.save_2d_pg_plot(win0, 'transport_system')
 win1 = vis.PgAnimatedPlot(eval_data, title=eval_data[0].name, save_pics=False, labels=dict(left='x(z,t)', bottom='z'))
 pg.QtGui.QApplication.instance().exec_()
-
-

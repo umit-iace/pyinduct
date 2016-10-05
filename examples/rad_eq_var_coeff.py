@@ -18,7 +18,7 @@ bound_cond_type = 'robin'
 l = 1
 T = 1
 spatial_domain = sim.Domain(bounds=(0, l), num=30)
-temporal_domain = sim.Domain(bounds=(0, T), num=1e2)
+temporal_domain = sim.Domain(bounds=(0, T), num=100)
 n = 10
 
 # original system parameters
@@ -56,7 +56,7 @@ eig_funcs = np.array([ef.TransformedSecondOrderEigenfunction(eig_val_t[i],
                                                              [a2, a1_z, a0_z], np.linspace(0, l, 1e4)) for i in
                       range(n)])
 
-# create testfunctions
+# create test functions
 nodes, fem_funcs = sh.cure_interval(sh.LagrangeFirstOrder, spatial_domain.bounds, node_count=len(spatial_domain))
 
 # register functions
