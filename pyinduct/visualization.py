@@ -363,7 +363,7 @@ class PgLinePlot3d(PgDataPlot):
         for t_idx, t_val in enumerate(t_subsets):
             t_vals = np.array([res.input_data[0][t_val]] * len(z_vals))
             pts = np.vstack([t_vals, z_vals, res.output_data[t_val, :]]).transpose()
-            plt = gl.GLLinePlotItem(pos=pts, color=pg.glColor((t_idx, n * 1.3)), # width=(t_idx + 1) / 10.,
+            plt = gl.GLLinePlotItem(pos=pts, color=pg.glColor((t_idx, n * 1.3)),  # width=(t_idx + 1) / 10.,
                                     width=2, antialias=True)
             self.w.addItem(plt)
 
@@ -417,8 +417,8 @@ class MplSlicePlot(PgDataPlot):
     def __init__(self, eval_data_list, time_point=None, spatial_point=None, ylabel="", legend_label=None,
                  legend_location=1, figure_size=(10, 6)):
 
-        if not ((isinstance(time_point, Number) ^ isinstance(spatial_point, Number)) and (
-            isinstance(time_point, type(None)) ^ isinstance(spatial_point, type(None)))):
+        if not ((isinstance(time_point, Number) or isinstance(spatial_point, Number)) and (
+                isinstance(time_point, type(None)) or isinstance(spatial_point, type(None)))):
             raise TypeError("Only one kwarg *_point can be passed,"
                             "which has to be an instance from type numbers.Number")
 
@@ -462,7 +462,7 @@ def mpl_activate_latex():
     Activate full (label, ticks, ...) latex printing in matplotlib plots.
     """
     plt.rcParams['text.latex.preamble'] = [r"\usepackage{lmodern}"]
-    params = {'text.usetex': True, 'font.size': 15, 'font.family': 'lmodern', 'text.latex.unicode': True,}
+    params = {'text.usetex': True, 'font.size': 15, 'font.family': 'lmodern', 'text.latex.unicode': True}
     plt.rcParams.update(params)
 
 

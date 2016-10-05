@@ -391,7 +391,6 @@ class LagrangeSecondOrder(Function):
                 return 0
 
         def lag2nd_ddz(z):
-            # if z == start or z == end:
             if (z == start and not kwargs.get("left_border", False)
                     or z == end and not kwargs.get("right_border", False)):
                 return s
