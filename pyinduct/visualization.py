@@ -18,7 +18,7 @@ import pyqtgraph.exporters
 import pyqtgraph.opengl as gl
 import scipy.interpolate as si
 
-from . import utils as ut
+# from . import utils as ut
 
 colors = ["g", "c", "m", "b", "y", "k", "w", "r"]
 pg.setConfigOption('background', 'w')
@@ -160,11 +160,11 @@ class PgAnimatedPlot(PgDataPlot):
         self._export_complete = False
         self._exported_files = []
 
-        if self.save_pics:
+        if self.save_pics and False:
             self._exporter = pg.exporters.ImageExporter(self._pw.plotItem)
             self._exporter.parameters()['width'] = 1e3
 
-            picture_path = ut.create_dir(self._res_path)
+            picture_path = None  # ut.create_dir(self._res_path)
             export_digits = int(np.abs(np.round(np.log10(self._endtime // self._t_step), 0)))
             # ffmpeg uses c-style format strings
             ff_name = "_".join(
@@ -219,7 +219,8 @@ class PgAnimatedPlot(PgDataPlot):
                 self._export_complete = True
                 print("saved pictures using mask: " + self._ff_mask)
                 if self.create_video:
-                    ut.create_animation(input_file_mask=self._ff_mask)
+                    pass
+                    # ut.create_animation(input_file_mask=self._ff_mask)
 
         if self.save_pics and not self._export_complete:
             if new_indexes != self._plot_indexes:
@@ -497,10 +498,10 @@ def save_2d_pg_plot(plot, filename):
         filename (str): Png picture filename.
 
     Return:
-        tuple of 2 str's: Path with filename and path only.
+        tuple of 2 strings: Path with filename and path only.
     """
 
-    path = ut.create_dir('pictures_plot') + os.path.sep
+    path = None  # ut.create_dir('pictures_plot') + os.path.sep
     path_filename = path + filename + '.png'
     exporter = pg.exporters.ImageExporter(plot.plotItem)
     exporter.parameters()['width'] = 1e3
