@@ -164,10 +164,10 @@ class LagrangeNthOrder(Function):
 
         Args:
             domain (:py:class:`pyinduct.simulation.Domain`): Domain to be cured.
-            order (int): Order of the lagrange polynomials.
+            **kwargs: mandatory key ``order`` : Order of the lagrange polynomials.
 
         Return:
-            tupel: (domain, funcs), where funcs is a set of :py:class:`LagrangeNthOrder` shapefunctions.
+            tuple: (domain, funcs), where funcs is a set of :py:class:`LagrangeNthOrder` shapefunctions.
         """
         order = kwargs["order"]
         nodes = np.array(domain)
@@ -224,17 +224,17 @@ class LagrangeFirstOrder(Function):
         if kwargs.get("half", None) is None:
             args1 = kwargs.copy()
             args1.update({"right_border": False})
-            rise_fncs = self._function_factory(start, start, top, **args1)
+            rise_funcs = self._function_factory(start, start, top, **args1)
             args2 = kwargs.copy()
             args2.update({"left_border": False})
-            fall_fncs = self._function_factory(top, end, end, **args2)
+            fall_funcs = self._function_factory(top, end, end, **args2)
 
             def _lag1st_factory(der):
                 def _lag1st_complete(z):
                     if z == top:
-                        return .5 * (rise_fncs[der](z) + fall_fncs[der](z))
+                        return .5 * (rise_funcs[der](z) + fall_funcs[der](z))
                     else:
-                        return rise_fncs[der](z) + fall_fncs[der](z)
+                        return rise_funcs[der](z) + fall_funcs[der](z)
 
                 return _lag1st_complete
 
@@ -382,8 +382,8 @@ class LagrangeSecondOrder(Function):
                 return 0
 
         def lag2nd_dz(z):
-            if z == start and not kwargs.get("left_border", False) or \
-                        z == end and not kwargs.get("right_border", False):
+            if (z == start and not kwargs.get("left_border", False)
+                    or z == end and not kwargs.get("right_border", False)):
                 return .5 * s * (2 * z + p)
             if start <= z <= end:
                 return s * (2 * z + p)
@@ -392,8 +392,8 @@ class LagrangeSecondOrder(Function):
 
         def lag2nd_ddz(z):
             # if z == start or z == end:
-            if z == start and not kwargs.get("left_border", False) or \
-                        z == end and not kwargs.get("right_border", False):
+            if (z == start and not kwargs.get("left_border", False)
+                    or z == end and not kwargs.get("right_border", False)):
                 return s
             if start <= z <= end:
                 return s * 2
