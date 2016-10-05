@@ -53,10 +53,10 @@ def simulation_benchmark(spat_domain, settings):
 
     u = sim.SimulationInputSum(
         [tr.SignalGenerator('square', np.array(temp_domain), frequency=0.3, scale=2, offset=4, phase_shift=1),
-            tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[15]),
-            tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[25], scale=-4),
-            tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[35]),
-            tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[60], scale=-2), ])
+         tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[15]),
+         tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[25], scale=-4),
+         tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[35]),
+         tr.SignalGenerator('gausspulse', np.array(temp_domain), phase_shift=temp_domain[60], scale=-2), ])
 
     _c = time.clock()
     weak_form = sim.WeakFormulation([
